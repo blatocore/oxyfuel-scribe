@@ -1,0 +1,13 @@
+[package]
+name = "oxyfuel-scribe"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+pest = "2.6"
+pest_derive = "2.6"
+clap = { version = "4.4.11", features = ["derive"] }
+enigo = "0.2.1"
+log = "0.4.22"
+env_logger = "0.11.5"
+global-hotkey = "0.5.4"

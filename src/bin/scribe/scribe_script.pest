@@ -1,0 +1,63 @@
+WHITESPACE = _{ " " | "\t" }
+string = {
+	("\"" ~ ( !(NEWLINE | "\"") ~ ANY)* ~ "\"") |
+    ("\'" ~ ( !(NEWLINE | "\'") ~ ANY)* ~ "\'")
+}
+number = {ASCII_ALPHANUMERIC+}
+
+modifiers = {
+    "alt" |
+    "control" |	
+    "shift" |
+    "super"
+}
+
+
+keys = {
+    "arrow_down" |
+    "arrow_left" |
+    "arrow_right" |
+    "arrow_up" |
+    "backspace" |
+    "caps_lock" |
+    "delete" |
+    "end" |
+    "enter" |
+    "escape" |
+    "home" |
+    "insert" |
+    "page_down" |
+    "page_up" |
+    "print_screen" |
+    "spacebar" |
+    "tab" |
+    ASCII
+}
+
+script = {
+    SOI ~
+    (WHITESPACE | "\n")* ~
+    ( command ~ (";" | NEWLINE*)? )* ~
+    (WHITESPACE | "\n")* ~
+    EOI 
+}
+
+command = {type_cmd | waitfor_cmd | sleep_cmd | comment}
+comment = {"#" ~ (!(NEWLINE) ~ ASCII)*}
+
+
+type_cmd = {"TYPE" ~ type_cmd_prompt}
+special_chr = {press_special | release_special | click_special}
+press_special = {"v" ~ (modifiers | keys) ~ "v"}
+release_special = {"^" ~ (modifiers | keys) ~ "^"}
+click_special = {"<" ~ (modifiers | keys) ~ ">"}
+
+type_cmd_prompt = {(string | special_chr)*}
+
+waitfor_cmd = {
+	"WAITFOR" ~ 
+    string
+}
+
+sleep_cmd = {"SLEEP" ~ sleep_amount_ms}
+sleep_amount_ms = {ASCII_DIGIT+}

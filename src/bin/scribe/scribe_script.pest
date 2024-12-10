@@ -37,12 +37,14 @@ keys = {
 script = {
     SOI ~
     (WHITESPACE | "\n")* ~
-    ( command ~ (";" | NEWLINE)? )* ~
+    ( command ~ (";" | NEWLINE*)? )* ~
     (WHITESPACE | "\n")* ~
     EOI 
 }
 
-command = {type_cmd | waitfor_cmd | sleep_cmd}
+command = {type_cmd | waitfor_cmd | sleep_cmd | comment}
+comment = {"#" ~ (!(NEWLINE) ~ ASCII)*}
+
 
 type_cmd = {"TYPE" ~ type_cmd_prompt}
 special_chr = {press_special | release_special | click_special}

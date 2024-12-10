@@ -1,5 +1,5 @@
 use std::fs;
-use std::error::Error;
+
 
 use pest::Parser;
 use pest::iterators::Pairs;
@@ -20,16 +20,23 @@ use crate::misc_utils::{
 };
 
 #[ derive(Parser) ]
-#[ grammar = "./scribe_script.pest" ]
+#[ grammar = "./bin/scribe/scribe_script.pest" ]
 pub struct TypistParser;
 
-fn print_type_of<T>(_: &T) {
-    println!("{}", std::any::type_name::<T>())
+
+pub fn run_from_string(script: String) -> Result<(), ScribeError> {
+    parse_script(script)
 }
 
-pub fn parse_script(path: &str) -> Result<(), ScribeError> {
+pub fn run_from_file(path: &str) -> Result<(), ScribeError> {
     let unparsed_file = fs::read_to_string(path).expect("cannot read file");
-    let script = TypistParser::parse(Rule::script, &unparsed_file)
+    parse_script(unparsed_file)
+}
+
+// Must run a script from a string, since pest can not do buffered reading
+// scripts should not be too big anyway to this should not be a great issue
+fn parse_script(script: String) -> Result<(), ScribeError> {
+    let script = TypistParser::parse(Rule::script, &script)
         .expect("Input could not be parsed")
         .next()
         .unwrap();
@@ -54,6 +61,7 @@ fn command_handler(r: &mut Pairs<Rule>) -> Result<(), ScribeError> {
         Rule::type_cmd    => type_cmd_handler(&mut inner_rules)?,
         Rule::waitfor_cmd => waitfor_cmd_handler(&mut inner_rules)?,
         Rule::sleep_cmd   => sleep_cmd_handler(&mut inner_rules)?,
+        Rule::comment     => (),
         _ => unreachable!() 
     }
 
@@ -80,7 +88,6 @@ fn waitfor_cmd_handler(r: &mut Pairs<Rule>) -> Result<(), ScribeError> {
             _ => unreachable!()
         };
     }
-    println!("hotkey registered");
     scribe_core::wait_for_shortcut(hk)?;
     Ok(())
 }
@@ -99,7 +106,7 @@ fn type_cmd_handler(r: &mut Pairs<Rule>) -> Result<(), ScribeError> {
     for prompt_part in prompt.into_inner(){
         match prompt_part.as_rule() {
             Rule::string => {
-                let (quote, text) = unsurround(&prompt_part.as_str());
+                let (_quote, text) = unsurround(&prompt_part.as_str());
                 scribe_core::type_string(&mut enigo, &text);
             },
             Rule::special_chr => {

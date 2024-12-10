@@ -4,21 +4,22 @@ mod key_translation;
 mod errors;
 mod misc_utils;
 
+use errors::*;
+
 use clap::Parser;
 
-use log::{debug, info, warn, error};
 use env_logger;
+use log::error;
+
 use std::{io};
-use std::io::IsTerminal;
+use std::io::{IsTerminal, Read};
 
-
-// 
 #[derive(Parser, Debug)]
 #[command(version = "1.0.0")]
 #[command(about = "Program that can simulate and wait for user input, for automated tasks", long_about = None)]
 struct Args {
-    /// You can supply commands directly, or supply them to stdin
-    commands: Option<String>,
+    /// Read script from file, if file is not provided, program will attempt reading from stdin
+    file: Option<String>,
 
     /// Display help for writing scribe scripts
     #[arg(long)]
@@ -69,15 +70,30 @@ fn main() -> !{
     //scribe_script_parser::parse_script("./test.scribe")
     //    .expect("An error occurred while parsing or executing commands");
     
-    let mut commands = String::new();
-    let stdin = io::stdin(); 
-    let empty_stdin = !(stdin.is_terminal());
+    let empty_stdin = io::stdin().is_terminal();
 
-    if empty_stdin && cli.commands == None {
-        println!("A scribe script must be supplied either in stdin (e.g. via a pipe), or as a positional argument. See --help for more");
+    if empty_stdin && cli.file == None {
+        println!("A scribe script file must be supplied, or provided in stdin (e.g via a pipe). See --help for more");
         std::process::exit(exit_failure);
     }
 
+    let err: Result<(), ScribeError>;
 
-    std::process::exit(exit_sucess);
+    if let Some(f) = cli.file {
+        err = scribe_script_parser::run_from_file(&f);
+    }
+    else {
+        let mut script = String::new();
+        let _ = io::stdin().read_to_string(&mut script);
+        err = scribe_script_parser::run_from_string(script);
+    }
+
+
+    match err {
+        Err(ScribeError {kind, message}) => { 
+            error!("An {:?} error has occured: {}", kind, message);
+            std::process::exit(exit_failure);
+        },
+        Ok(_)          => std::process::exit(exit_sucess),
+    }
 }

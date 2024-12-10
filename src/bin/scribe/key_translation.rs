@@ -1,4 +1,4 @@
-use enigo::Key;
+
 use global_hotkey::hotkey::HotKey;
 
 use crate::errors;

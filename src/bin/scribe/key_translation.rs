@@ -1,9 +1,10 @@
-
 use global_hotkey::hotkey::HotKey;
 
-use crate::errors;
 
-pub fn scribe_to_enigo(input: &str) -> Result<enigo::Key, errors::ScribeError> {
+use anyhow::{anyhow,Result};
+
+
+pub fn scribe_to_enigo(input: &str) -> Result<enigo::Key> {
     match input {
         "alt"          =>  Ok(enigo::Key::Alt),
         "control" 	   =>  Ok(enigo::Key::Control),
@@ -29,22 +30,13 @@ pub fn scribe_to_enigo(input: &str) -> Result<enigo::Key, errors::ScribeError> {
             let char_vec: Vec<char> = input.chars().collect();
             match char_vec.len() {
                 1 => return Ok(enigo::Key::Unicode(char_vec[0])),
-                _ => return Err(errors::ScribeError {
-                    kind: errors::ScribeErrorKind::UnrecognizedChar,
-                    message: format!("Unrecognized character \"{}\"", input)
-                })
+                _ => return Err(anyhow!("Unrecognized special character \"{}\"", input))
             }
         }
     }
 }
 
-pub fn scribe_to_global_hotkey(input: &str) -> Result<HotKey, errors::ScribeError> {
-    match input.parse() {
-        Ok(x) => Ok(x),
-        _     => Err(errors::ScribeError {
-            kind: errors::ScribeErrorKind::UnableToWaitFor,
-            message: format!("Unable to register a waitfor command for shortcut \"{}\"", input)
-        })
-    }
+pub fn scribe_to_global_hotkey(input: &str) -> Result<HotKey> {
+    Ok(HotKey::try_from(input)?)
 }
 

@@ -9,6 +9,7 @@ use global_hotkey::{
     GlobalHotKeyManager,
 };
 
+use anyhow::Result;
 
 use log::{info};
 
@@ -17,43 +18,36 @@ use std::thread;
 
 
 use crate::key_translation;
-use crate::errors::*;
 
-pub fn type_string(en: &mut enigo::Enigo, prompt: &str) -> () {
+pub fn type_string(en: &mut enigo::Enigo, prompt: &str) -> Result<()> {
     info!("typing string \"{}\"", prompt);
-    let _ = en.text(prompt);
+    en.text(prompt)?;
+    Ok(())
 }
 
-pub fn click_special(en: &mut enigo::Enigo, key: &str) -> Result<(), ScribeError> {
+pub fn click_special(en: &mut enigo::Enigo, key: &str) -> Result<()> {
     let enigo_key = key_translation::scribe_to_enigo(key)?;
     info!("clicking \"{:?}\"", enigo_key);
-    let _ = en.key(enigo_key, Click);
+    en.key(enigo_key, Click)?;
     Ok(())
 }
 
-pub fn press_special(en: &mut enigo::Enigo, key: &str) -> Result<(), ScribeError> {
+pub fn press_special(en: &mut enigo::Enigo, key: &str) -> Result<()> {
     let enigo_key = key_translation::scribe_to_enigo(key)?;
     info!("pressing \"{:?}\"", enigo_key);
-    let _ = en.key(enigo_key, Press);
+    en.key(enigo_key, Press)?;
     Ok(())
 }
 
-pub fn release_special(en: &mut enigo::Enigo, key: &str) -> Result<(), ScribeError> {
+pub fn release_special(en: &mut enigo::Enigo, key: &str) -> Result<()> {
     let enigo_key = key_translation::scribe_to_enigo(key)?;
     info!("releasing \"{:?}\"", enigo_key);
-    let _ = en.key(enigo_key, Release);
+    en.key(enigo_key, Release)?;
     Ok(())
 }
 
-pub fn wait_for_shortcut(hk: hotkey::HotKey) -> Result<(), ScribeError> {
-    let manager = GlobalHotKeyManager::new();
-    if let Err(_) = manager {
-        return Err(ScribeError {
-            kind: ScribeErrorKind::UnableToWaitFor,
-            message: format!("unable to register a shortcut")
-        });
-    } 
-    let manager = manager.unwrap();
+pub fn wait_for_shortcut(hk: hotkey::HotKey) -> Result<()> {
+    let manager = GlobalHotKeyManager::new()?;
 
     info!("registering shortcut: {:?}; key: {:?}", hk.mods, hk.key);
     let _ = manager.register(hk);

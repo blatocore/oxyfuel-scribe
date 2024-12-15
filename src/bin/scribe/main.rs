@@ -1,15 +1,14 @@
 mod scribe_script_parser;
 mod scribe_core;
 mod key_translation;
-mod errors;
 mod misc_utils;
-
-use errors::*;
 
 use clap::Parser;
 
 use env_logger;
 use log::error;
+
+use anyhow::Result;
 
 use std::{io};
 use std::io::{IsTerminal, Read};
@@ -77,7 +76,7 @@ fn main() -> !{
         std::process::exit(exit_failure);
     }
 
-    let err: Result<(), ScribeError>;
+    let err: Result<()>;
 
     if let Some(f) = cli.file {
         err = scribe_script_parser::run_from_file(&f);
@@ -90,8 +89,8 @@ fn main() -> !{
 
 
     match err {
-        Err(ScribeError {kind, message}) => { 
-            error!("An {:?} error has occured: {}", kind, message);
+        Err(x) => { 
+            error!("An error has occured: {}", x.to_string());
             std::process::exit(exit_failure);
         },
         Ok(_)          => std::process::exit(exit_sucess),

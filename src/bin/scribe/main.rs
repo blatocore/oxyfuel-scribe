@@ -22,7 +22,19 @@ struct Args {
 
     /// Display help for writing scribe scripts
     #[arg(long)]
-    script_help: bool
+    script_help: bool,
+
+    /// Display available key names. These names are used in individual key-presses in
+    /// TYPE command and in WAITFOR command (according to
+    /// https://w3c.github.io/uievents-code/##code-value-tables)
+    #[arg(long)]
+    keylist: bool,
+
+    /// Display available modifier names. These names are used in individual key-presses in
+    /// TYPE command and in WAITFOR command (according to
+    /// https://w3c.github.io/uievents-code/##code-value-tables)
+    #[arg(long)]
+    modlist: bool,
 }
 
 fn print_scripting_help() -> () {
@@ -62,6 +74,15 @@ fn main() -> !{
 
     if cli.script_help { 
         print_scripting_help();
+        std::process::exit(exit_sucess);
+    }
+
+    if cli.keylist {
+        misc_utils::print_available_keys();
+        std::process::exit(exit_sucess);
+    }
+    if cli.modlist {
+        misc_utils::print_available_modifiers();
         std::process::exit(exit_sucess);
     }
 

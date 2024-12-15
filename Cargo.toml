@@ -7,7 +7,7 @@ edition = "2021"
 pest = "2.6"
 pest_derive = "2.6"
 clap = { version = "4.4.11", features = ["derive"] }
-enigo = "0.2.1"
+enigo = "0.3.0"
 log = "0.4.22"
 env_logger = "0.11.5"
 global-hotkey = "0.5.4"

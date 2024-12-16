@@ -39,27 +39,43 @@ struct Args {
 
 fn print_scripting_help() -> () {
     let scripting = "\
-    # TYPE command \n\
-    Used for simulating user input, incl. pressing, releasing and clicking keys.\n\
-    ## Usage\n\
-    ```\n\
-    TYPE [string|<key>|vkeyv|^key^]...;\n\
-    ```\n\
-    - Strings will be typed verbatim and must be in quotes/double quotes\n\
-    - <key> clicks a key or a modifier\n\
-    - vkeyv presses a key or a modifier\n\
-    - ^key^ releases a key or a modifier\n\
-    \n\
-    # WAITFOR command\n\
-    Halts script execution, until a specified keyboard shortcut is pressed.\n\
-    \n\
-    ## Usage\n\
-    ```\n\
-    WAITFOR string;\n\
-    ```\n\
-    String is a valid combination of \"modifier+modifier+...+modifier+key\"\n\
-    - modifiers must be as per https://w3c.github.io/uievents-key/#keys-modifier\n\
-    - key must be as per https://w3c.github.io/uievents-code/#code-value-tables\n\
+Scripts consist of commands, separated by either ';' or '\n'. Available commands are `TYPE`, `WAITFOR`, `SLEEP`.
+
+### TYPE command 
+Used for simulating user input, incl. pressing, releasing and clicking keys.
+
+```
+TYPE [string|<key>|vkeyv|^key^]...;
+```
+- Strings will be typed verbatim and must be in quotes/double quotes. Only printable characters
+- <key> clicks a key or a modifier
+- vkeyv presses a key or a modifier
+- ^key^ releases a key or a modifier
+
+Names of individual keys that can be pressed, released, or clicked, can be found by:
+```
+scribe [--keylist|--modlist] | grep '(T)'
+```
+
+### WAITFOR command
+Halts script execution, until a specified keyboard shortcut is pressed.
+
+```
+WAITFOR string;
+```
+String is a valid combination of \"modifier+modifier+...+modifier+key\"
+- modifiers must be as per https://w3c.github.io/uievents-key/#keys-modifier
+- key must be as per https://w3c.github.io/uievents-code/#code-value-tables
+
+Names of individual keys and modifiers that can be used to register a keyboard-shortcut can be found by:
+```
+scribe [--keylist|--modlist] | grep '(W)'
+```
+
+### SLEEP command
+```
+SLEEP <miliseconds>
+```
     ";
 
     println!("{scripting}");
